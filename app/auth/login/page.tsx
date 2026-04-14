@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { loginWithCredentials } from './server-actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,7 +11,6 @@ import { Heart, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -21,29 +20,19 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
+      const result = await loginWithCredentials(email, password)
 
-      const data = await response.json()
-
-      if (!response.ok) {
+      if (!result.success) {
         toast.error('Gagal log masuk', {
-          description: data.error || 'Berlaku ralat'
+          description: result.message
         })
         setLoading(false)
         return
       }
 
       toast.success('Berjaya log masuk!')
-      // Refresh to sync auth state with server
-      router.refresh()
-      // Delay to ensure refresh completes
-      setTimeout(() => router.push('/dashboard'), 500)
+      // Use full page navigation to ensure middleware re-runs with cookies
+      window.location.href = '/dashboard'
     } catch (err) {
       toast.error('Ralat', {
         description: err instanceof Error ? err.message : 'Berlaku ralat nilai tidak terduga'

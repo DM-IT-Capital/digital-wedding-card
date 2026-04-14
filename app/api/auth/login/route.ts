@@ -29,8 +29,15 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  return NextResponse.json(
+  // Get the cookies from the server client's internal state
+  const supabaseResponse = NextResponse.json(
     { success: true, session: data.session },
     { status: 200 }
   )
+
+  // Copy Supabase cookies to the response
+  const { data: { session } } = await supabase.auth.getSession()
+  
+  return supabaseResponse
 }
+
