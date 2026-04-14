@@ -11,35 +11,55 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Heart, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
-export default function LoginPage() {
+export default function SignUpPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [nama, setNama] = useState('')
+  const [telefon, setTelefon] = useState('')
   const [loading, setLoading] = useState(false)
 
-  async function handleLogin(e: React.FormEvent) {
+  async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({
+    
+    // Check if this is the first user (will be boss)
+    const { count } = await supabase
+      .from('creators')
+      .select('*', { count: 'exact', head: true })
+    
+    const isFirstUser = count === 0
+    
+    const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ?? 
+          `${window.location.origin}/auth/callback`,
+        data: {
+          nama: nama,
+          peranan: isFirstUser ? 'boss' : 'staff',
+          telefon: telefon || null,
+        },
+      },
     })
 
     if (error) {
-      toast.error('Gagal log masuk', {
-        description: error.message === 'Invalid login credentials' 
-          ? 'Emel atau kata laluan tidak sah' 
+      toast.error('Gagal mendaftar', {
+        description: error.message === 'User already registered' 
+          ? 'Emel ini sudah didaftarkan' 
           : error.message
       })
       setLoading(false)
       return
     }
 
-    toast.success('Berjaya log masuk!')
-    router.push('/dashboard')
-    router.refresh()
+    toast.success('Berjaya mendaftar!', {
+      description: 'Sila semak emel anda untuk pengesahan akaun.'
+    })
+    router.push('/auth/sign-up-success')
   }
 
   return (
@@ -50,14 +70,26 @@ export default function LoginPage() {
             <Heart className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-serif">Portal Kad Kahwin</CardTitle>
+            <CardTitle className="text-2xl font-serif">Daftar Akaun Baru</CardTitle>
             <CardDescription className="mt-2">
-              Log masuk untuk mengurus kad kahwin digital anda
+              Cipta akaun untuk mengurus kad kahwin digital
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSignUp} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="nama">Nama Penuh</Label>
+              <Input
+                id="nama"
+                type="text"
+                placeholder="Nama anda"
+                value={nama}
+                onChange={(e) => setNama(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Emel</Label>
               <Input
@@ -71,14 +103,26 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="telefon">No. Telefon (Pilihan)</Label>
+              <Input
+                id="telefon"
+                type="tel"
+                placeholder="012-3456789"
+                value={telefon}
+                onChange={(e) => setTelefon(e.target.value)}
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="password">Kata Laluan</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Masukkan kata laluan"
+                placeholder="Minimum 6 aksara"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={6}
                 disabled={loading}
               />
             </div>
@@ -86,21 +130,21 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Sedang log masuk...
+                  Sedang mendaftar...
                 </>
               ) : (
-                'Log Masuk'
+                'Daftar Sekarang'
               )}
             </Button>
           </form>
           <div className="mt-6 text-center space-y-2">
             <p className="text-sm text-muted-foreground">
-              Belum ada akaun?{' '}
-              <Link href="/auth/sign-up" className="text-primary hover:underline underline-offset-4 font-medium">
-                Daftar Akaun Baru
+              Sudah ada akaun?{' '}
+              <Link href="/auth/login" className="text-primary hover:underline underline-offset-4">
+                Log masuk di sini
               </Link>
             </p>
-            <Link href="/" className="text-sm text-muted-foreground hover:text-primary underline underline-offset-4 block">
+            <Link href="/" className="text-sm text-muted-foreground hover:text-primary underline underline-offset-4">
               Kembali ke laman utama
             </Link>
           </div>
