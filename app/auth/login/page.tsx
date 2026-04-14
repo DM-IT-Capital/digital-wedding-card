@@ -37,11 +37,18 @@ export default function LoginPage() {
       return
     }
 
-    toast.success('Berjaya log masuk!')
-    // Wait a moment to ensure session is set before redirecting
-    await new Promise(resolve => setTimeout(resolve, 500))
-    router.refresh()
-    router.push('/dashboard')
+    // Verify session is available before redirecting
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (session) {
+      toast.success('Berjaya log masuk!')
+      router.push('/dashboard')
+    } else {
+      toast.error('Gagal mendapatkan sesi', {
+        description: 'Sila cuba lagi'
+      })
+      setLoading(false)
+    }
   }
 
   return (
