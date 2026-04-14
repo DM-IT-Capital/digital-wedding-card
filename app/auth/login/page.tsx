@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { loginWithCredentials } from './server-actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,18 +19,27 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const result = await loginWithCredentials(email, password)
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include', // This is important - include cookies
+      })
 
-      if (!result.success) {
+      const data = await response.json()
+
+      if (!response.ok) {
         toast.error('Gagal log masuk', {
-          description: result.message
+          description: data.error || 'Berlaku ralat'
         })
         setLoading(false)
         return
       }
 
       toast.success('Berjaya log masuk!')
-      // Use full page navigation to ensure middleware re-runs with cookies
+      // Full page navigation to ensure middleware processes cookies
       window.location.href = '/dashboard'
     } catch (err) {
       toast.error('Ralat', {
