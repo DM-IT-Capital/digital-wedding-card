@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { loginAction } from './actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -21,18 +20,36 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
 
-    const result = await loginAction(email, password)
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
 
-    if (!result.success) {
-      toast.error('Gagal log masuk', {
-        description: result.error
+      const data = await response.json()
+
+      if (!response.ok) {
+        toast.error('Gagal log masuk', {
+          description: data.error || 'Berlaku ralat'
+        })
+        setLoading(false)
+        return
+      }
+
+      toast.success('Berjaya log masuk!')
+      // Refresh to sync auth state with server
+      router.refresh()
+      // Delay to ensure refresh completes
+      setTimeout(() => router.push('/dashboard'), 500)
+    } catch (err) {
+      toast.error('Ralat', {
+        description: err instanceof Error ? err.message : 'Berlaku ralat nilai tidak terduga'
       })
       setLoading(false)
-      return
     }
-
-    toast.success('Berjaya log masuk!')
-    router.push('/dashboard')
   }
 
   return (
