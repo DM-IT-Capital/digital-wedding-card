@@ -1,14 +1,15 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Playfair_Display, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-serif' });
+const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
+  title: 'Portal Kad Kahwin Digital',
+  description: 'Platform untuk mencipta dan mengurus kad kahwin digital yang cantik',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -35,9 +36,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased">
+    <html lang="ms" className="bg-background">
+      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         {children}
+        <Toaster />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
