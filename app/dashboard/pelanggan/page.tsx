@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Plus, Search, Eye, Edit, MoreHorizontal, Trash2 } from 'lucide-react'
+import { Plus, Search, Eye, Edit, MoreHorizontal, Trash2, Share2 } from 'lucide-react'
 import Link from 'next/link'
 import {
   DropdownMenu,
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import type { Pelanggan } from '@/lib/types'
 import { DeletePelangganButton } from '@/components/dashboard/delete-pelanggan-button'
+import { ShareDialog } from '@/components/dashboard/share-dialog'
 
 export default async function PelangganPage() {
   const supabase = await createClient()
@@ -91,12 +92,18 @@ export default async function PelangganPage() {
                     </span>
                     
                     {pelanggan.status === 'published' && (
-                      <Button variant="ghost" size="icon" asChild>
-                        <Link href={`/kad/${pelanggan.slug}`} target="_blank">
-                          <Eye className="h-4 w-4" />
-                          <span className="sr-only">Lihat kad</span>
-                        </Link>
-                      </Button>
+                      <>
+                        <Button variant="ghost" size="icon" asChild>
+                          <Link href={`/kad/${pelanggan.slug}`} target="_blank">
+                            <Eye className="h-4 w-4" />
+                            <span className="sr-only">Lihat kad</span>
+                          </Link>
+                        </Button>
+                        <ShareDialog 
+                          slug={pelanggan.slug} 
+                          namaPengantin={`${pelanggan.nama_pengantin_lelaki} & ${pelanggan.nama_pengantin_perempuan}`}
+                        />
+                      </>
                     )}
                     
                     <Button variant="outline" size="sm" asChild>
@@ -121,12 +128,18 @@ export default async function PelangganPage() {
                           </Link>
                         </DropdownMenuItem>
                         {pelanggan.status === 'published' && (
-                          <DropdownMenuItem asChild>
-                            <Link href={`/kad/${pelanggan.slug}`} target="_blank">
-                              <Eye className="mr-2 h-4 w-4" />
-                              Lihat Kad
-                            </Link>
-                          </DropdownMenuItem>
+                          <>
+                            <DropdownMenuItem asChild>
+                              <Link href={`/kad/${pelanggan.slug}`} target="_blank">
+                                <Eye className="mr-2 h-4 w-4" />
+                                Lihat Kad
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                              <Share2 className="mr-2 h-4 w-4" />
+                              Kongsi Kad
+                            </DropdownMenuItem>
+                          </>
                         )}
                         <DropdownMenuSeparator />
                         <DeletePelangganButton pelangganId={pelanggan.id} />
