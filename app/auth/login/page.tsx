@@ -93,14 +93,8 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-          <div className="mt-6 text-center space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Belum ada akaun?{' '}
-              <Link href="/auth/sign-up" className="text-primary hover:underline underline-offset-4 font-medium">
-                Daftar Akaun Baru
-              </Link>
-            </p>
-            <Link href="/" className="text-sm text-muted-foreground hover:text-primary underline underline-offset-4 block">
+          <div className="mt-6 text-center">
+            <Link href="/" className="text-sm text-muted-foreground hover:text-primary underline underline-offset-4">
               Kembali ke laman utama
             </Link>
           </div>
