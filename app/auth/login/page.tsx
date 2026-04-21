@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,6 +12,7 @@ import { Heart, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -19,28 +22,27 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include', // This is important - include cookies
+      const supabase = createClient()
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       })
 
-      const data = await response.json()
-
-      if (!response.ok) {
+      if (error) {
         toast.error('Gagal log masuk', {
-          description: data.error || 'Berlaku ralat'
+          description:
+            error.message === 'Invalid login credentials'
+              ? 'Emel atau kata laluan tidak sah'
+              : error.message,
         })
         setLoading(false)
         return
       }
 
       toast.success('Berjaya log masuk!')
-      // Full page navigation to ensure middleware processes cookies
-      window.location.href = '/dashboard'
+      router.replace('/dashboard')
+      router.refresh()
     } catch (err) {
       toast.error('Ralat', {
         description: err instanceof Error ? err.message : 'Berlaku ralat nilai tidak terduga'

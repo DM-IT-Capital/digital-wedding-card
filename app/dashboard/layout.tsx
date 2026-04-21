@@ -20,31 +20,49 @@ export default async function DashboardLayout({
   }
 
   // Get creator profile and self-heal older accounts that only have auth metadata.
-  const { data: existingCreator } = await supabase
+  const { data: existingCreator, error: existingCreatorError } = await supabase
     .from('creators')
     .select('*')
     .eq('id', user.id)
     .maybeSingle()
+
+  if (existingCreatorError) {
+    redirect(`/auth/error?error=${encodeURIComponent(existingCreatorError.message)}`)
+  }
 
   let creator = existingCreator
 
   if (!creator) {
     const userMetadata = user.user_metadata ?? {}
 
-    const { data: createdCreator, error: createCreatorError } = await supabase
+    const { error: upsertCreatorError } = await supabase
       .from('creators')
-      .insert({
+      .upsert({
         id: user.id,
         email: user.email ?? '',
         nama: userMetadata.nama ?? user.email ?? 'Pengguna',
         peranan: userMetadata.peranan === 'boss' ? 'boss' : 'staff',
         telefon: userMetadata.telefon ?? null,
       })
-      .select('*')
+      .select('id')
       .single()
 
-    if (createCreatorError || !createdCreator) {
-      redirect('/auth/error')
+    if (upsertCreatorError) {
+      redirect(`/auth/error?error=${encodeURIComponent(upsertCreatorError.message)}`)
+    }
+
+    const { data: createdCreator, error: createdCreatorError } = await supabase
+      .from('creators')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+
+    if (createdCreatorError || !createdCreator) {
+      redirect(
+        `/auth/error?error=${encodeURIComponent(
+          createdCreatorError?.message ?? 'Creator profile could not be loaded',
+        )}`,
+      )
     }
 
     creator = createdCreator

@@ -15,22 +15,34 @@ export async function GET(request: NextRequest) {
       } = await supabase.auth.getUser()
 
       if (user) {
-        const { data: creator } = await supabase
+        const { data: creator, error: creatorError } = await supabase
           .from('creators')
           .select('id')
           .eq('id', user.id)
           .maybeSingle()
 
+        if (creatorError) {
+          return NextResponse.redirect(
+            `${origin}/auth/error?error=${encodeURIComponent(creatorError.message)}`,
+          )
+        }
+
         if (!creator) {
           const userMetadata = user.user_metadata ?? {}
 
-          await supabase.from('creators').insert({
+          const { error: insertError } = await supabase.from('creators').upsert({
             id: user.id,
             email: user.email ?? '',
             nama: userMetadata.nama ?? user.email ?? 'Pengguna',
             peranan: userMetadata.peranan === 'boss' ? 'boss' : 'staff',
             telefon: userMetadata.telefon ?? null,
           })
+
+          if (insertError) {
+            return NextResponse.redirect(
+              `${origin}/auth/error?error=${encodeURIComponent(insertError.message)}`,
+            )
+          }
         }
       }
 
