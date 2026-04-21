@@ -73,7 +73,7 @@ export default async function DashboardLayout({
       <DashboardHeader creator={creator as Creator} />
       <div className="flex">
         <DashboardSidebar creator={creator as Creator} />
-        <main className="flex-1 p-6 lg:p-8 pt-20 lg:ml-64">
+        <main className="flex-1 p-6 pt-20 lg:ml-64 lg:p-8 lg:pt-24">
           {children}
         </main>
       </div>

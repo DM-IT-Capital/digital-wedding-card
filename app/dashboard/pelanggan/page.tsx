@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Plus, Search, Eye, Edit, MoreHorizontal, Trash2, Share2 } from 'lucide-react'
+import { Plus, Search, Eye, Edit, MoreHorizontal, Trash2, Share2, ImagePlus } from 'lucide-react'
 import Link from 'next/link'
 import {
   DropdownMenu,
@@ -125,6 +125,12 @@ export default async function PelangganPage() {
                           <Link href={`/dashboard/pelanggan/${pelanggan.id}`}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Maklumat
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/dashboard/pelanggan/${pelanggan.id}/design`}>
+                            <ImagePlus className="mr-2 h-4 w-4" />
+                            Urus Rekaan
                           </Link>
                         </DropdownMenuItem>
                         {pelanggan.status === 'published' && (

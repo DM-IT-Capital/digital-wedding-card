@@ -15,6 +15,7 @@ import { Loader2, Save, Eye, ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import type { Pelanggan } from '@/lib/types'
+import { isCustomDesignValue } from '@/lib/design'
 
 interface PelangganFormProps {
   pelanggan?: Pelanggan
@@ -33,6 +34,8 @@ export function PelangganForm({ pelanggan }: PelangganFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('pengantin')
+  const existingCustomDesignUrl =
+    pelanggan && isCustomDesignValue(pelanggan.template) ? pelanggan.template : ''
   
   const [formData, setFormData] = useState({
     // Pengantin Lelaki
@@ -76,7 +79,7 @@ export function PelangganForm({ pelanggan }: PelangganFormProps) {
     // Design
     tema_warna: pelanggan?.tema_warna || '#D4A574',
     font_style: pelanggan?.font_style || 'serif',
-    template: pelanggan?.template || 'classic',
+    template: existingCustomDesignUrl ? 'custom-upload' : pelanggan?.template || 'classic',
     
     // Dress Code
     dress_code: pelanggan?.dress_code || '',
@@ -126,6 +129,7 @@ export function PelangganForm({ pelanggan }: PelangganFormProps) {
 
     const dataToSave = {
       ...formData,
+      template: existingCustomDesignUrl || formData.template,
       status: saveAsStatus || formData.status,
       creator_id: user.id,
       slug: pelanggan?.slug || generateSlug(formData.nama_pengantin_lelaki, formData.nama_pengantin_perempuan),
@@ -174,6 +178,13 @@ export function PelangganForm({ pelanggan }: PelangganFormProps) {
           </Link>
         </Button>
         <div className="flex items-center gap-2">
+          {pelanggan ? (
+            <Button type="button" variant="outline" asChild>
+              <Link href={`/dashboard/pelanggan/${pelanggan.id}/design`}>
+                Urus Rekaan
+              </Link>
+            </Button>
+          ) : null}
           <Button
             type="button"
             variant="outline"
@@ -586,12 +597,20 @@ export function PelangganForm({ pelanggan }: PelangganFormProps) {
                     <SelectValue placeholder="Pilih template" />
                   </SelectTrigger>
                   <SelectContent>
+                    {existingCustomDesignUrl ? (
+                      <SelectItem value="custom-upload">Rekaan Tersuai Aktif</SelectItem>
+                    ) : null}
                     <SelectItem value="classic">Klasik</SelectItem>
                     <SelectItem value="modern">Moden</SelectItem>
                     <SelectItem value="elegant">Elegan</SelectItem>
                     <SelectItem value="rustic">Rustic</SelectItem>
                   </SelectContent>
                 </Select>
+                {existingCustomDesignUrl ? (
+                  <p className="text-xs text-muted-foreground">
+                    Rekaan tersuai sedang digunakan. Anda boleh ubah fail pada halaman `Urus Rekaan`.
+                  </p>
+                ) : null}
               </div>
             </CardContent>
           </Card>

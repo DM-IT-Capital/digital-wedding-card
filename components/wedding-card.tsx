@@ -22,6 +22,7 @@ import { format, differenceInDays, differenceInHours, differenceInMinutes, diffe
 import { ms } from 'date-fns/locale'
 import Image from 'next/image'
 import { toast } from 'sonner'
+import { isCustomDesignValue } from '@/lib/design'
 
 interface WeddingCardProps {
   pelanggan: Pelanggan
@@ -83,6 +84,7 @@ export function WeddingCard({ pelanggan, media, tetapan }: WeddingCardProps) {
   const couplePhoto = media.find(m => m.jenis === 'foto_pengantin')
   const galleryPhotos = media.filter(m => m.jenis === 'foto_galeri')
   const qrDuitnow = media.find(m => m.jenis === 'qr_duitnow')
+  const customDesignUrl = isCustomDesignValue(pelanggan.template) ? pelanggan.template : null
 
   // Get the main event date for countdown
   const mainEventDate = pelanggan.tarikh_sanding_perempuan || pelanggan.tarikh_sanding_lelaki || pelanggan.tarikh_nikah
@@ -132,6 +134,15 @@ export function WeddingCard({ pelanggan, media, tetapan }: WeddingCardProps) {
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
             <div className="relative">
+              {customDesignUrl ? (
+                <div className="mb-6 overflow-hidden rounded-3xl border border-primary/10 bg-white shadow-xl">
+                  <img
+                    src={customDesignUrl}
+                    alt={`Rekaan ${pelanggan.nama_pengantin_lelaki} dan ${pelanggan.nama_pengantin_perempuan}`}
+                    className="max-h-[70vh] w-full object-contain"
+                  />
+                </div>
+              ) : null}
               <Heart className="h-16 w-16 mx-auto text-primary mb-4" />
               <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground mb-2">
                 Walimatul Urus
@@ -174,6 +185,50 @@ export function WeddingCard({ pelanggan, media, tetapan }: WeddingCardProps) {
         '--primary-color': pelanggan.tema_warna,
       } as React.CSSProperties}
     >
+      {customDesignUrl ? (
+        <div className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
+          <div className="overflow-hidden rounded-3xl border bg-white shadow-xl">
+            <img
+              src={customDesignUrl}
+              alt={`Rekaan ${pelanggan.nama_pengantin_lelaki} dan ${pelanggan.nama_pengantin_perempuan}`}
+              className="w-full object-contain"
+            />
+          </div>
+
+          <div className="mx-auto mt-8 max-w-xl space-y-4 text-center">
+            <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+              {pelanggan.nama_pengantin_lelaki} & {pelanggan.nama_pengantin_perempuan}
+            </p>
+
+            {pelanggan.whatsapp_rsvp ? (
+              <Button size="lg" asChild>
+                <a
+                  href={`https://wa.me/${pelanggan.whatsapp_rsvp.replace(/\D/g, '')}?text=${encodeURIComponent(`Assalamualaikum, saya ingin mengesahkan kehadiran ke majlis perkahwinan ${pelanggan.nama_pengantin_lelaki} & ${pelanggan.nama_pengantin_perempuan}.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MessageCircle className="mr-2 h-5 w-5" />
+                  RSVP melalui WhatsApp
+                </a>
+              </Button>
+            ) : null}
+
+            <div>
+              <Button variant="outline" onClick={handleShare}>
+                <Share2 className="mr-2 h-4 w-4" />
+                Kongsi Jemputan
+              </Button>
+            </div>
+
+            {tetapan ? (
+              <p className="text-xs text-muted-foreground">
+                Dikuasakan oleh {tetapan.nama_perniagaan}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      ) : (
+      <>
       {/* Hero Section */}
       <section className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -646,6 +701,8 @@ export function WeddingCard({ pelanggan, media, tetapan }: WeddingCardProps) {
           )}
         </div>
       </footer>
+      </>
+      )}
     </div>
   )
 }
