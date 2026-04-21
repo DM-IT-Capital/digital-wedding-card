@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const cookieStore = await cookies()
     const supabase = await createClient()
 
     const { error, data } = await supabase.auth.signInWithPassword({
@@ -38,23 +39,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create response with success
+    // Log cookies for debugging
+    console.log('Available cookies after signin:', cookieStore.getAll().map(c => c.name))
+
+    // Create response
     const response = NextResponse.json(
-      { success: true, session: data.session },
+      { 
+        success: true, 
+        session: data.session,
+        cookies: cookieStore.getAll().map(c => ({ name: c.name, value: c.value.substring(0, 20) + '...' }))
+      },
       { status: 200 }
     )
 
-    // Manually set the auth cookies that Supabase needs
-    const cookieStore = await cookies()
-    const authCookies = cookieStore.getAll()
-    
-    // Copy all cookies from the server to the response
-    authCookies.forEach(cookie => {
-      response.cookies.set(cookie.name, cookie.value, {
-        httpOnly: true,
+    // Supabase server client should have already set cookies through the handler
+    // But let's manually ensure they're in the response
+    cookieStore.getAll().forEach(({ name, value }) => {
+      response.cookies.set(name, value, {
+        httpOnly: name.includes('sb-'), // Supabase cookies should be httpOnly
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 365, // 1 year
+        path: '/',
       })
     })
 
@@ -67,5 +72,6 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
 
 

@@ -19,17 +19,35 @@ export default async function DashboardLayout({
     redirect('/auth/login')
   }
 
-  // Get creator profile
-  const { data: creator } = await supabase
+  // Get creator profile and self-heal older accounts that only have auth metadata.
+  const { data: existingCreator } = await supabase
     .from('creators')
     .select('*')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
+
+  let creator = existingCreator
 
   if (!creator) {
-    // If no creator profile exists, sign out and redirect
-    await supabase.auth.signOut()
-    redirect('/auth/login')
+    const userMetadata = user.user_metadata ?? {}
+
+    const { data: createdCreator, error: createCreatorError } = await supabase
+      .from('creators')
+      .insert({
+        id: user.id,
+        email: user.email ?? '',
+        nama: userMetadata.nama ?? user.email ?? 'Pengguna',
+        peranan: userMetadata.peranan === 'boss' ? 'boss' : 'staff',
+        telefon: userMetadata.telefon ?? null,
+      })
+      .select('*')
+      .single()
+
+    if (createCreatorError || !createdCreator) {
+      redirect('/auth/error')
+    }
+
+    creator = createdCreator
   }
 
   return (

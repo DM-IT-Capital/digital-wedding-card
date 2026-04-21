@@ -10,6 +10,30 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (user) {
+        const { data: creator } = await supabase
+          .from('creators')
+          .select('id')
+          .eq('id', user.id)
+          .maybeSingle()
+
+        if (!creator) {
+          const userMetadata = user.user_metadata ?? {}
+
+          await supabase.from('creators').insert({
+            id: user.id,
+            email: user.email ?? '',
+            nama: userMetadata.nama ?? user.email ?? 'Pengguna',
+            peranan: userMetadata.peranan === 'boss' ? 'boss' : 'staff',
+            telefon: userMetadata.telefon ?? null,
+          })
+        }
+      }
+
       return NextResponse.redirect(`${origin}${next}`)
     }
   }
