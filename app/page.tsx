@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Heart, Sparkles, Share2, Palette, MessageCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { EnquiryDialog } from '@/components/enquiry-dialog'
+import type { RekaanPortal } from '@/lib/types'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -13,6 +14,13 @@ export default async function HomePage() {
     .from('tetapan')
     .select('*')
     .single()
+
+  const { data: rekaanList } = await supabase
+    .from('rekaan_portal')
+    .select('*')
+    .eq('is_active', true)
+    .order('urutan', { ascending: true })
+    .order('created_at', { ascending: false }) as { data: RekaanPortal[] | null }
 
   return (
     <div className="min-h-screen bg-background">
@@ -104,6 +112,57 @@ export default async function HomePage() {
               </CardContent>
             </Card>
           </div>
+        </div>
+      </section>
+
+      {/* Design Gallery */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm text-primary">
+              <Palette className="h-4 w-4" />
+              <span>Pilihan Rekaan</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4">
+              Pilih Rekaan Yang Anda Suka
+            </h2>
+            <p className="text-muted-foreground">
+              Ini ialah contoh design yang tersedia di portal. Pelanggan boleh lihat dahulu, pilih rekaan kegemaran, dan terus hubungi anda untuk membuat tempahan.
+            </p>
+          </div>
+
+          {rekaanList && rekaanList.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {rekaanList.map((rekaan) => (
+                <Card key={rekaan.id} className="overflow-hidden border-0 shadow-md transition-shadow hover:shadow-lg">
+                  <div className="aspect-[3/4] bg-muted">
+                    <img src={rekaan.image_url} alt={rekaan.tajuk} className="h-full w-full object-cover" />
+                  </div>
+                  <CardContent className="space-y-4 p-6">
+                    <div>
+                      <h3 className="font-serif text-xl font-semibold">{rekaan.tajuk}</h3>
+                      {rekaan.penerangan ? (
+                        <p className="mt-2 text-sm text-muted-foreground">{rekaan.penerangan}</p>
+                      ) : (
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          Rekaan contoh untuk tatapan pelanggan sebelum membuat tempahan.
+                        </p>
+                      )}
+                    </div>
+                    <EnquiryDialog tetapan={tetapan} variant="default" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-dashed bg-card p-12 text-center">
+              <Palette className="mx-auto mb-4 h-10 w-10 text-muted-foreground" />
+              <h3 className="text-xl font-serif font-semibold">Galeri Rekaan Akan Datang</h3>
+              <p className="mt-2 text-muted-foreground">
+                Rekaan contoh akan dipaparkan di sini sebaik sahaja anda memuat naiknya dari portal.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 

@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Heart, Menu, User, LogOut, LayoutDashboard, Users, Settings, MessageSquare, UserCog } from 'lucide-react'
+import { Heart, Menu, User, LogOut, LayoutDashboard, Users, Settings, MessageSquare, UserCog, Palette } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Creator } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -27,6 +27,7 @@ interface DashboardHeaderProps {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Pelanggan', href: '/dashboard/pelanggan', icon: Users },
+  { name: 'Rekaan', href: '/dashboard/rekaan', icon: Palette },
   { name: 'Pertanyaan', href: '/dashboard/pertanyaan', icon: MessageSquare },
 ]
 

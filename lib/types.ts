@@ -108,6 +108,19 @@ export interface Tetapan {
   updated_at: string
 }
 
+export interface RekaanPortal {
+  id: string
+  tajuk: string
+  slug: string
+  penerangan: string | null
+  image_url: string
+  storage_path: string | null
+  urutan: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export interface Pertanyaan {
   id: string
   nama: string

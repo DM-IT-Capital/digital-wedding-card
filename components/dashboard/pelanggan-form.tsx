@@ -178,13 +178,6 @@ export function PelangganForm({ pelanggan }: PelangganFormProps) {
           </Link>
         </Button>
         <div className="flex items-center gap-2">
-          {pelanggan ? (
-            <Button type="button" variant="outline" asChild>
-              <Link href={`/dashboard/pelanggan/${pelanggan.id}/design`}>
-                Urus Rekaan
-              </Link>
-            </Button>
-          ) : null}
           <Button
             type="button"
             variant="outline"

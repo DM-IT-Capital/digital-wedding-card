@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { Heart, LayoutDashboard, Users, Settings, MessageSquare, UserCog } from 'lucide-react'
+import { Heart, LayoutDashboard, Users, Settings, MessageSquare, UserCog, Palette } from 'lucide-react'
 import type { Creator } from '@/lib/types'
 
 interface DashboardSidebarProps {
@@ -13,6 +13,7 @@ interface DashboardSidebarProps {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Pelanggan', href: '/dashboard/pelanggan', icon: Users },
+  { name: 'Rekaan', href: '/dashboard/rekaan', icon: Palette },
   { name: 'Pertanyaan', href: '/dashboard/pertanyaan', icon: MessageSquare },
 ]
 
